@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Study Planner</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Comfortaa&display=swap');
+
+  /* Reset */
+  * {
+    box-sizing: border-box;
+  }
+
+  body, html {
+    margin: 0; padding: 0;
+    font-family: 'Comfortaa', cursive;
+    background: #f7f5fc;
+    color: #2e1a6f;
+    height: 100vh;
+    display: flex;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    background: #6a4fbd;
+    color: white;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0 24px 24px 0;
+    box-shadow: 4px 0 12px rgb(106 79 189 / 0.2);
+  }
+
+  .sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 40px;
+    font-weight: 700;
+    font-size: 24px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 26px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    padding: 6px 8px;
+    border-radius: 12px;
+    user-select: none;
+    transition: background-color 0.25s ease;
+  }
+
+  .nav-item:hover, .nav-item.active {
+    background-color: #4c3697;
+  }
+
+  .nav-item svg {
+    fill: white;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Planner container */
+  .planner-container {
+    flex: 1;
+    padding: 40px 30px;
+    background: white;
+    border-radius: 24px 0 0 24px;
+    box-shadow: 0 12px 40px rgba(106, 79, 189, 0.15);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .planner-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 32px;
+    color: #4b328a;
+  }
+
+  /* Schedule grid */
+  .schedule {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    border-top: 3px solid #9b81e5;
+    border-left: 3px solid #9b81e5;
+    user-select: none;
+    flex-grow: 1;
+  }
+
+  /* Headers */
+  .time-label-header {
+    background: #f7f5fc;
+    border-right: 3px solid #9b81e5;
+    border-bottom: 3px solid #9b81e5;
+  }
+
+  .time-slot-header {
+    background: #9b81e5;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: center;
+    padding: 12px 8px;
+    border-right: 3px solid #7e67cc;
+    border-bottom: 3px solid #7e67cc;
+  }
+
+  /* Time labels */
+  .time-label {
+    background: #f0ecf8;
+    border-right: 3px solid #9b81e5;
+    border-bottom: 3px solid #9b81e5;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6e5f9c;
+    padding-right: 10px;
+    text-align: right;
+    line-height: 60px;
+  }
+
+  /* Time slots */
+  .time-slot {
+    border-right: 3px solid #9b81e5;
+    border-bottom: 3px solid #9b81e5;
+    background: #f9f7fe;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s ease;
+    min-height: 60px;
+    padding: 6px 8px;
+  }
+
+  .time-slot:hover {
+    background: #d6cffa;
+  }
+
+  /* Task pill */
+  .task-item {
+    background: #6a4fbd;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+  }
+
+  /* Modal styles */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(106, 79, 189, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  .modal {
+    background: white;
+    border-radius: 24px;
+    width: 360px;
+    max-width: 90vw;
+    padding: 28px 32px;
+    box-shadow: 0 12px 40px rgba(106, 79, 189, 0.3);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal h2 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    font-weight: 700;
+    color: #5e43c9;
+    font-size: 22px;
+  }
+
+  .modal label {
+    font-weight: 600;
+    color: #4a3283;
+    margin-bottom: 8px;
+  }
+
+  .modal input[type="text"] {
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 2px solid #b5a3f0;
+    font-family: 'Comfortaa', cursive;
+    font-size: 16px;
+    margin-bottom: 24px;
+    outline-offset: 2px;
+    transition: border-color 0.3s ease;
+  }
+
+  .modal input[type="text"]:focus {
+    border-color: #6a4fbd;
+    outline: none;
+    box-shadow: 0 0 12px #a394f4bb;
+  }
+
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+  }
+
+  .btn-save {
+    background-color: #6a4fbd;
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.25s ease;
+  }
+  .btn-save:hover {
+    background-color: #5b3f9f;
+  }
+
+  .btn-cancel {
+    background-color: #d8c8fa;
+    border: none;
+    color: #4a3283;
+    font-weight: 700;
+    padding: 12px 28px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.25s ease;
+  }
+  .btn-cancel:hover {
+    background-color: #c3aff6;
+  }
+</style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <h2>Study Planner</h2>
+    <div class="nav-item active" data-page="dashboard">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 13h4v-2H4v2zm0 4h4v-2H4v2zm6-8h10v-2H10v2z"/></svg> Dashboard
+    </div>
+    <div class="nav-item" data-page="planner">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg> Planner
+    </div>
+    <div class="nav-item" data-page="focus-timer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 1H9v2h6V1zm3.7 3.3-1.4 1.4A7.95 7.95 0 0119 12c0 4.4-3.6 8-8 8s-8-3.6-8-8 3.6-8 8-8a7.95 7.95 0 015.3 1.9l1.4-1.4L18.7 4.3zM12 18c3.3 0 6-2.7 6-6 0-1.1-.4-2.1-1-2.9L9.1 15c.8.6 1.9 1 2.9 1z"/></svg> Focus Timer
+    </div>
+    <div class="nav-item" data-page="insights">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 17h3v-7H4v7zm6-12v12h3V5h-3zm6 7h3v5h-3v-5z"/></svg> Insights
+    </div>
+  </aside>
+
+  <main class="planner-container" id="planner-container">
+    <div class="planner-title">Weekly Planner</div>
+    <div class="schedule" id="schedule">
+      <!-- Headers -->
+      <div class="time-label-header"></div>
+      <div class="time-slot-header">Monday</div>
+      <div class="time-slot-header">Tuesday</div>
+      <div class="time-slot-header">Wednesday</div>
+      <div class="time-slot-header">Thursday</div>
+      <div class="time-slot-header">Friday</div>
+      <div class="time-slot-header">Saturday</div>
+      <div class="time-slot-header">Sunday</div>
+      <!-- Time rows inserted by JS -->
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-bg" id="modalBg" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 id="modalTitle">Add Task</h2>
+      <label for="taskInput">Task description:</label>
+      <input type="text" id="taskInput" placeholder="Enter your task" />
+      <div class="modal-buttons">
+        <button class="btn-save" id="saveBtn">Save</button>
+        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const scheduleEl = document.getElementById('schedule');
+  const modalBg = document.getElementById('modalBg');
+  const taskInput = document.getElementById('taskInput');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+
+  // Days & hours to show
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const startHour = 8;  // 8 AM
+  const endHour = 20;   // 8 PM
+
+  // Store tasks by "day-hour" key
+  const tasks = {};
+
+  let activeSlotKey = null;
+
+  // Build schedule grid
+  function buildSchedule() {
+    for(let hour = startHour; hour <= endHour; hour++) {
+      // Time label column
+      const timeLabel = document.createElement('div');
+      timeLabel.classList.add('time-label');
+      timeLabel.textContent = formatHour(hour);
+      scheduleEl.appendChild(timeLabel);
+
+      // Days slots
+      for(let d=0; d < days.length; d++) {
+        const day = days[d];
+        const slot = document.createElement('div');
+        slot.classList.add('time-slot');
+        const key = `${day}-${hour}`;
+        slot.dataset.key = key;
+
+        // Show existing task if present
+        if(tasks[key]) {
+          const taskEl = document.createElement('div');
+          taskEl.classList.add('task-item');
+          taskEl.textContent = tasks[key];
+          slot.appendChild(taskEl);
+        }
+
+        slot.addEventListener('click', () => openModal(key));
+        scheduleEl.appendChild(slot);
+      }
+    }
+  }
+
+  function formatHour(h) {
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hour12 = h % 12 === 0 ? 12 : h % 12;
+    return `${hour12}:00 ${ampm}`;
+  }
+
+  // Open modal for task input
+  function openModal(key) {
+    activeSlotKey = key;
+    modalBg.style.display = 'flex';
+    taskInput.value = tasks[key] || '';
+    taskInput.focus();
+    document.getElementById('modalTitle').textContent = `Add Task for ${key.replace('-', ', ')}`;
+  }
+
+  // Close modal
+  function closeModal() {
+    modalBg.style.display = 'none';
+    activeSlotKey = null;
+    taskInput.value = '';
+  }
+
+  // Save task and refresh
+  function saveTask() {
+    if(!activeSlotKey) return;
+    const val = taskInput.value.trim();
+    if(val) {
+      tasks[activeSlotKey] = val;
+    } else {
+      delete tasks[activeSlotKey];
+    }
+    refreshSchedule();
+    closeModal();
+  }
+
+  // Refresh schedule UI
+  function refreshSchedule() {
+    // Remove all except header row (first 8 children)
+    while(scheduleEl.children.length > 8) {
+      scheduleEl.removeChild(scheduleEl.lastChild);
+    }
+    buildSchedule();
+  }
+
+  // Init
+  buildSchedule();
+
+  // Event listeners
+  saveBtn.addEventListener('click', saveTask);
+  cancelBtn.addEventListener('click', closeModal);
+
+  modalBg.addEventListener('click', e => {
+    if(e.target === modalBg) closeModal();
+  });
+
+  taskInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter') saveTask();
+    else if(e.key === 'Escape') closeModal();
+  });
+</script>
+
+</body>
+</html>
