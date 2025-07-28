@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Study Planner Dashboard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Comfortaa&display=swap');
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0; padding: 0;
+      font-family: 'Comfortaa', cursive;
+      background: #f7f5fc;
+      color: #2e1a6f;
+      height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: 260px;
+      background: #6a4fbd;
+      color: white;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 0 24px 24px 0;
+      box-shadow: 4px 0 12px rgb(106 79 189 / 0.2);
+    }
+    .sidebar h2 {
+      margin-top: 0;
+      margin-bottom: 40px;
+      font-weight: 700;
+      font-size: 24px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 6px 8px;
+      border-radius: 12px;
+      user-select: none;
+      transition: background-color 0.25s ease;
+    }
+    .nav-item:hover, .nav-item.active {
+      background-color: #4c3697;
+    }
+    .nav-item svg {
+      fill: white;
+      width: 20px;
+      height: 20px;
+    }
+    .sidebar-features {
+      margin-top: 8px;
+      margin-left: 32px;
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #d6cbf9;
+      user-select: none;
+    }
+    .sidebar-features div {
+      margin-bottom: 6px;
+    }
+    .planner-container {
+      flex: 1;
+      padding: 40px 30px;
+      background: white;
+      border-radius: 24px 0 0 24px;
+      box-shadow: 0 12px 40px rgba(106, 79, 189, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* New welcome message styles */
+    .welcome-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+    .welcome-message {
+      text-align: right;
+      color: #5a42b0;
+    }
+    .welcome-message h1 {
+      margin: 0 0 6px;
+      font-weight: 800;
+      font-size: 28px;
+    }
+    .welcome-message .motto {
+      margin: 0;
+      font-style: italic;
+      font-weight: 500;
+      color: #8a7bc9;
+      font-size: 16px;
+    }
+
+    .planner-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 32px;
+      color: #4b328a;
+    }
+    .task-card {
+      background: #f1ecff;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 600;
+      font-size: 15px;
+      color: #4b328a;
+      border: 2px solid #c6b6fa;
+      cursor: pointer;
+      transition: background 0.25s ease;
+    }
+    .task-card:hover {
+      background: #e1d6fb;
+    }
+
+    /* Modal */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      background: rgba(106, 79, 189, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .modal {
+      background: white;
+      border-radius: 24px;
+      width: 360px;
+      max-width: 90vw;
+      padding: 28px 32px;
+      box-shadow: 0 12px 40px rgba(106, 79, 189, 0.3);
+      display: flex;
+      flex-direction: column;
+    }
+    .modal h2 {
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-weight: 700;
+      color: #5e43c9;
+      font-size: 22px;
+    }
+    .modal label {
+      font-weight: 600;
+      color: #4a3283;
+      margin-bottom: 8px;
+    }
+    .modal input[type="text"] {
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 2px solid #b5a3f0;
+      font-family: 'Comfortaa', cursive;
+      font-size: 16px;
+      margin-bottom: 24px;
+      outline-offset: 2px;
+      transition: border-color 0.3s ease;
+    }
+    .modal input[type="text"]:focus {
+      border-color: #6a4fbd;
+      outline: none;
+      box-shadow: 0 0 12px #a394f4bb;
+    }
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 14px;
+    }
+    .btn-save {
+      background-color: #6a4fbd;
+      border: none;
+      color: white;
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background-color 0.25s ease;
+    }
+    .btn-save:hover {
+      background-color: #5b3f9f;
+    }
+    .btn-cancel {
+      background-color: #d8c8fa;
+      border: none;
+      color: #4a3283;
+      font-weight: 700;
+      padding: 12px 28px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: background-color 0.25s ease;
+    }
+    .btn-cancel:hover {
+      background-color: #c3aff6;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <h2>Study Planner</h2>
+    <div class="nav-item active" data-page="dashboard">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 13h4v-2H4v2zm0 4h4v-2H4v2zm6-8h10v-2H10v2z"/></svg>
+      Dashboard
+    </div>
+    <div class="sidebar-features" aria-label="Other Features under dashboard">
+      <div>Focus Timer</div>
+      <div>Insights</div>
+      <div>Planner</div>
+    </div>
+  </aside>
+
+  <!-- Dashboard container -->
+  <main class="planner-container" id="dashboardView">
+
+    <div class="welcome-wrapper">
+      <div class="welcome-message">
+        <h1>Welcome to Your Study Planner!</h1>
+        <p class="motto">“Plan well, study smart, achieve greatness.”</p>
+      </div>
+    </div>
+
+    <div class="planner-title">Dashboard Overview</div>
+    <div id="taskList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+    <!-- TASK MANAGER -->
+    <div style="margin-top: 40px;">
+      <h3 style="color: #4b328a; font-weight: 700; margin-bottom: 12px;">Task Manager</h3>
+
+      <div id="taskManager" style="display: flex; flex-direction: column; gap: 10px;">
+        <!-- Task items inserted here -->
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button id="addTaskBtn" style="
+          background-color: #6a4fbd; color: white; border: none;
+          padding: 10px 20px; border-radius: 20px; font-weight: 700;
+          cursor: pointer;">Add Task</button>
+        <button id="editTaskBtn" style="
+          background-color: #d8c8fa; color: #4a3283; border: none;
+          padding: 10px 20px; border-radius: 20px; font-weight: 700;
+          cursor: pointer; margin-left: 10px;" disabled>Edit Task</button>
+        <button id="deleteTaskBtn" style="
+          background-color: #e96479; color: white; border: none;
+          padding: 10px 20px; border-radius: 20px; font-weight: 700;
+          cursor: pointer; margin-left: 10px;" disabled>Delete Task</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-bg" id="modalBg" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 id="modalTitle">Edit Task</h2>
+      <label for="taskInput">Task description:</label>
+      <input type="text" id="taskInput" placeholder="Enter your task" />
+      <div class="modal-buttons">
+        <button class="btn-save" id="saveBtn">Save</button>
+        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const taskList = document.getElementById('taskList');
+    const modalBg = document.getElementById('modalBg');
+    const taskInput = document.getElementById('taskInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    const taskManager = document.getElementById('taskManager');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const editTaskBtn = document.getElementById('editTaskBtn');
+    const deleteTaskBtn = document.getElementById('deleteTaskBtn');
+
+    // Example initial tasks
+    const tasks = {
+      "Monday-9": "Math Homework",
+      "Monday-14": "Biology Review",
+      "Tuesday-11": "Group Project",
+      "Wednesday-17": "Read Literature",
+      "Friday-10": "Chemistry Lab"
+    };
+
+    let activeSlotKey = null;  // for modal editing
+    let selectedTaskKey = null; // for task manager selection
+
+    function openModal(key) {
+      activeSlotKey = key;
+      modalBg.style.display = 'flex';
+      taskInput.value = tasks[key] || '';
+      taskInput.focus();
+      document.getElementById('modalTitle').textContent = (key ? `Edit Task: ${key}` : 'Add Task');
+    }
+
+    function closeModal() {
+      modalBg.style.display = 'none';
+      activeSlotKey = null;
+      taskInput.value = '';
+    }
+
+    function saveTask() {
+      const val = taskInput.value.trim();
+      if (!val) {
+        // Delete if editing and input is empty
+        if (activeSlotKey) {
+          delete tasks[activeSlotKey];
+        }
+      } else {
+        if (activeSlotKey) {
+          tasks[activeSlotKey] = val;
+        } else {
+          // Add new task with unique key
+          const newKey = `Task-${Date.now()}`;
+          tasks[newKey] = val;
+        }
+      }
+      activeSlotKey = null;
+      selectedTaskKey = null;
+      editTaskBtn.disabled = true;
+      deleteTaskBtn.disabled = true;
+      renderDashboard();
+      renderTaskManager();
+      closeModal();
+    }
+
+    function renderDashboard() {
+      taskList.innerHTML = '';
+      const entries = Object.entries(tasks);
+      if (entries.length === 0) {
+        const empty = document.createElement('div');
+        empty.textContent = 'No tasks scheduled.';
+        empty.style.fontStyle = 'italic';
+        empty.style.color = '#888';
+        taskList.appendChild(empty);
+        return;
+      }
+      entries.sort().forEach(([key, val]) => {
+        const card = document.createElement('div');
+        card.className = 'task-card';
+        card.textContent = `${key}: ${val}`;
+        card.addEventListener('click', () => openModal(key));
+        taskList.appendChild(card);
+      });
+    }
+
+    function renderTaskManager() {
+      taskManager.innerHTML = '';
+      const entries = Object.entries(tasks);
+      if (entries.length === 0) {
+        taskManager.textContent = 'No tasks added.';
+        editTaskBtn.disabled = true;
+        deleteTaskBtn.disabled = true;
+        return;
+      }
+
+      entries.sort().forEach(([key, val]) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.textContent = `${key}: ${val}`;
+        taskDiv.style.padding = '10px';
+        taskDiv.style.border = '1.5px solid #b5a3f0';
+        taskDiv.style.borderRadius = '12px';
+        taskDiv.style.cursor = 'pointer';
+        taskDiv.style.backgroundColor = selectedTaskKey === key ? '#a394f4' : 'white';
+        taskDiv.style.color = selectedTaskKey === key ? 'white' : '#4b328a';
+        taskDiv.addEventListener('click', () => {
+          selectedTaskKey = key === selectedTaskKey ? null : key; // toggle selection
+          editTaskBtn.disabled = !selectedTaskKey;
+          deleteTaskBtn.disabled = !selectedTaskKey;
+          renderTaskManager();
+        });
+        taskManager.appendChild(taskDiv);
+      });
+    }
+
+    // Button handlers
+    addTaskBtn.addEventListener('click', () => {
+      activeSlotKey = null;
+      openModal(null);
+    });
+
+    editTaskBtn.addEventListener('click', () => {
+      if (!selectedTaskKey) return;
+      activeSlotKey = selectedTaskKey;
+      openModal(selectedTaskKey);
+    });
+
+    deleteTaskBtn.addEventListener('click', () => {
+      if (!selectedTaskKey) return;
+      delete tasks[selectedTaskKey];
+      selectedTaskKey = null;
+      editTaskBtn.disabled = true;
+      deleteTaskBtn.disabled = true;
+      renderDashboard();
+      renderTaskManager();
+    });
+
+    // Modal event listeners
+    saveBtn.addEventListener('click', saveTask);
+    cancelBtn.addEventListener('click', closeModal);
+    modalBg.addEventListener('click', e => {
+      if (e.target === modalBg) closeModal();
+    });
+    taskInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') saveTask();
+      else if (e.key === 'Escape') closeModal();
+    });
+
+    // Initial render
+    renderDashboard();
+    renderTaskManager();
+  </script>
+</body>
+</html>
