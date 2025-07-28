@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Productivity Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f4fc;
+      color: #2e0f4c;
+    }
+
+    .navbar {
+      background-color: #6a0dad;
+      display: flex;
+      justify-content: space-around;
+      padding: 15px 0;
+      color: white;
+      font-weight: bold;
+    }
+
+    .navbar div {
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      margin: 0;
+      color: #6a0dad;
+    }
+
+    .card {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(106, 13, 173, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .insight-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .insight-box {
+      flex: 1;
+      min-width: 200px;
+      background-color: #ede3f7;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .feedback {
+      font-style: italic;
+      color: #5a2c7c;
+    }
+
+    .planner-list li {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .timer {
+      text-align: center;
+      font-size: 48px;
+      margin: 20px 0;
+    }
+
+    .timer-controls button {
+      background-color: #6a0dad;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <div onclick="showTab('dashboard')">📊 Dashboard</div>
+    <div onclick="showTab('planner')">📅 Planner</div>
+    <div onclick="showTab('focus')">⏱️ Focus Timer</div>
+  </div>
+
+  <div class="container">
+    <!-- Dashboard -->
+    <div id="dashboard">
+      <div class="header">
+        <h1>Student Insight Dashboard</h1>
+        <p>Tracking performance & well-being</p>
+      </div>
+
+      <div class="card">
+        <strong>👤 John Doe – Class 10-B – July 28, 2025</strong>
+      </div>
+
+      <div class="card">
+        <h3>✅ Performance Summary</h3>
+        <div class="insight-row">
+          <div class="insight-box">
+            <strong>Score:</strong>
+            <p>90% – Great job this week!</p>
+          </div>
+          <div class="insight-box">
+            <strong>Completed Tasks:</strong>
+            <p>12 out of 14</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>💧 Wellness Tracker</h3>
+        <div class="insight-row">
+          <div class="insight-box">
+            <strong>Water Intake:</strong>
+            <p>5 times today (↑ 2 vs yesterday)</p>
+          </div>
+          <div class="insight-box">
+            <strong>Breaks Taken:</strong>
+            <p>7 breaks (↑ more than usual)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>💬 Smart Feedback</h3>
+        <p class="feedback">
+          “You took more breaks than usual today — remember to stay focused. But your hydration is on point, keep it up!”
+        </p>
+      </div>
+    </div>
+
+    <!-- Planner -->
+    <div id="planner" class="hidden">
+      <div class="header">
+        <h1>📅 Planner</h1>
+        <p>Manage your daily tasks</p>
+      </div>
+
+      <div class="card">
+        <h3>📝 Today's Tasks</h3>
+        <ul class="planner-list">
+          <li>✅ Submit Science Assignment</li>
+          <li>⬜ Review Math Chapter 5</li>
+          <li>⬜ Attend online history class at 2PM</li>
+          <li>⬜ Practice essay writing – 30 min</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Focus Timer -->
+    <div id="focus" class="hidden">
+      <div class="header">
+        <h1>⏱️ Focus Timer</h1>
+        <p>Stay productive with Pomodoro-style sessions</p>
+      </div>
+
+      <div class="card">
+        <div class="timer" id="timerDisplay">25:00</div>
+        <div class="timer-controls">
+          <button onclick="startTimer()">Start</button>
+          <button onclick="pauseTimer()">Pause</button>
+          <button onclick="resetTimer()">Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    function showTab(tab) {
+      document.getElementById("dashboard").classList.add("hidden");
+      document.getElementById("planner").classList.add("hidden");
+      document.getElementById("focus").classList.add("hidden");
+      document.getElementById(tab).classList.remove("hidden");
+    }
+
+    // Focus Timer
+    let timer;
+    let timeLeft = 1500; // 25 minutes
+    let running = false;
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const seconds = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timerDisplay").textContent = `${minutes}:${seconds}`;
+    }
+
+    function startTimer() {
+      if (!running) {
+        running = true;
+        timer = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timer);
+            alert("⏰ Time's up! Take a break.");
+          }
+        }, 1000);
+      }
+    }
+
+    function pauseTimer() {
+      running = false;
+      clearInterval(timer);
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      timeLeft = 1500;
+      updateTimerDisplay();
+    }
+
+    updateTimerDisplay();
+  </script>
+
+</body>
+</html>
